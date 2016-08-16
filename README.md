@@ -4,11 +4,7 @@
 
 Please refer to **boost::format** documentation to explore all formatting capabilities.
 
-The module is compatible with Python 2.x and Python 3.x versions:
-
-- In Python 2.x the module exposes **Format** and **UFormat** classes (*str* and *unicode*)
-
-- In Python 3.x the module exposes **Format** class only (*str*, which is de facto *unicode*)
+The module is compatible with Python 2.x and Python 3.x versions and fully supports unicode.
 
 
 ## Requirements ##
