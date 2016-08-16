@@ -3,8 +3,7 @@
 
 import unittest
 
-from pyformat import  Format as F
-from pyformat import UFormat as U
+from pyformat import Format as F
 
 
 class TestFormat(unittest.TestCase):
@@ -30,22 +29,22 @@ class TestFormat(unittest.TestCase):
 
 class TestUFormat(unittest.TestCase):
     def testInit(self):
-        f = U( u'' )
-        f = U( u'%|| %|| %||' )
-        f = U( u'%1% %2% %3%' )
+        f = F( u'' )
+        f = F( u'%|| %|| %||' )
+        f = F( u'%1% %2% %3%' )
 
         with self.assertRaises(ValueError):
-            f = U( u'%|xx|')
+            f = F( u'%|xx|')
 
 
     def testOutput(self):
-        f = U(u'%|| %|| %||')
+        f = F(u'%|| %|| %||')
         self.assertEqual(unicode( f % u'ě' % u'č' % u'š' ), u'ě č š')
 
-        f = U(u'%|.2f|')
+        f = F(u'%|.2f|')
         self.assertEqual(unicode( f % 1.0 ), u'1.00')
 
-        f = U(u'%||')
+        f = F(u'%||')
         self.assertEqual(unicode( f % None ), u'None')
 
 
