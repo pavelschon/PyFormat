@@ -15,12 +15,24 @@ add_compile_options( -pedantic )
 add_compile_options( -fPIC )
 add_compile_options( -std=c++11 )
 
+option( PYTHON "Python version" 3 )
+
+if( ${PYTHON} STREQUAL "3" OR NOT ${PYTHON} )
+
 find_package( PythonLibs "3" )
 find_package( PythonInterp "3" )
 
-# uncomment this to use exact Python version
-#find_package( PythonLibs   "2.7" REQUIRED )
-#find_package( PythonInterp "2.7" REQUIRED )
+elseif( ${PYTHON} STREQUAL "2")
+
+find_package( PythonLibs   "2.7" REQUIRED )
+find_package( PythonInterp "2.7" REQUIRED )
+
+else()
+
+message( STATUS "Did you set -DPYTHON=3 or -DPYTHON=2 ?" )
+message( FATAL_ERROR "Invalid option -DPY=${PY} " )
+
+endif()
 
 find_package( Boost COMPONENTS python REQUIRED )
 
@@ -36,9 +48,10 @@ execute_process (
     OUTPUT_VARIABLE Boost_PYTHON_LIBRARY OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
-message( STATUS "Python install path: ${PYTHON_PKG_PATH}")
-message( STATUS "Python include dirs: ${PYTHON_INCLUDE_DIRS}" )
-message( STATUS "Boost include dirs: ${Boost_INCLUDE_DIRS}" )
+message( STATUS "Python version string: ${PYTHONLIBS_VERSION_STRING}" )
+message( STATUS "Python install path:   ${PYTHON_PKG_PATH}" )
+message( STATUS "Python include dirs:   ${PYTHON_INCLUDE_DIRS}" )
+message( STATUS "Boost include dirs:    ${Boost_INCLUDE_DIRS}" )
 message( STATUS "Boost::Python linkage: ${Boost_PYTHON_LIBRARY}" )
 
 include_directories(
@@ -86,12 +99,18 @@ set( CPACK_PACKAGE_VERSION_PATCH "0" )
 set( CPACK_DEBIAN_PACKAGE_DESCRIPTION "PyFormat - boost::format python module" )
 set( CPACK_DEBIAN_PACKAGE_MAINTAINER "Pavel Schön <pavel@schon.cz>" )
 set( CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://github.com/pavelschon/PyFormat.git")
+
+if( ${PYTHON} STREQUAL "3" OR NOT ${PY} )
+
 set( CPACK_DEBIAN_PACKAGE_BUILD_DEPENDS "python3-dev (>= ${PYTHON_VERSION_STRING}), libboost-all-dev" )
 set( CPACK_DEBIAN_PACKAGE_DEPENDS "python3 (>= ${PYTHON_VERSION_STRING}), libboost-python${Boost_FULL_VERSION}" )
 
-# uncomment this for Python 2.7
-#set( CPACK_DEBIAN_PACKAGE_BUILD_DEPENDS "python-dev (>= 2.7), python-dev (<< 2.8), libboost-all-dev" )
-#set( CPACK_DEBIAN_PACKAGE_DEPENDS "python (>= 2.7), python (<< 2.8), libboost-python${Boost_FULL_VERSION}" )
+elseif( ${PYTHON} STREQUAL "2")
+
+set( CPACK_DEBIAN_PACKAGE_BUILD_DEPENDS "python-dev (>= 2.7), python-dev (<< 2.8), libboost-all-dev" )
+set( CPACK_DEBIAN_PACKAGE_DEPENDS "python (>= 2.7), python (<< 2.8), libboost-python${Boost_FULL_VERSION}" )
+
+endif()
 
 
 include(CPack)
