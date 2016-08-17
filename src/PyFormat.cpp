@@ -21,6 +21,27 @@ typedef boost::wformat::string_type wstring;
 
 using boost::io::format_error;
 
+const char * const encoding = "utf-8";
+
+#if PY_MAJOR_VERSION >= 3
+
+const object builtins = import( "builtins" );
+const object bytes    = builtins.attr( "bytes" );
+
+#else /* Python 2 */
+
+const object builtins = import( "__builtin__" );
+const object unicode  = builtins.attr( "unicode" );
+
+#endif
+
+template<class FORMAT> struct Convert
+{
+    static object toBytes( const FORMAT& fmt );
+    static object toUnicode( const FORMAT& fmt );
+};
+
+
 /**
  * @brief Translate format_error to PyExc_ValueError
  *
@@ -33,6 +54,8 @@ void translate_format_error( const format_error& e )
 }
 
 
+#if PY_MAJOR_VERSION >= 3
+
 /**
  * @brief Convert object to unicode ( Python 2 and 3 )
  *
@@ -43,25 +66,6 @@ std::wostream& operator<<( std::wostream& out, const object& obj )
 
     return out << s;
 }
-
-#if PY_MAJOR_VERSION >= 3
-
-const char * const encoding = "utf-8";
-
-const object builtins = import( "builtins" );
-const object bytes    = builtins.attr( "bytes" );
-
-
-/**
- * @brief Convert unicode to bytes
- *
- */
-template<class FORMAT>
-object fmtToBytes( const FORMAT& fmt )
-{
-    return bytes( fmt.str(), encoding );
-}
-
 
 /**
  * @brief Convert object to bytes ( Python 3 )
@@ -74,7 +78,18 @@ std::ostream& operator<<( std::ostream& out, const object& obj )
     return out << s;
 }
 
-#else
+#else /* Python 2 */
+
+/**
+ * @brief Convert object to unicode ( Python 2 and 3 )
+ *
+ */
+std::wostream& operator<<( std::wostream& out, const object& obj )
+{
+    const wstring s = extract<wstring>( unicode( obj ) );
+
+    return out << s;
+}
 
 /**
  * @brief Convert object to string ( Python 2 )
@@ -89,13 +104,102 @@ std::ostream& operator<<( std::ostream& out, const object& obj )
 
 #endif
 
+#if PY_MAJOR_VERSION >= 3
+
+template<> struct Convert<boost::format>
+{
+    /**
+    * @brief Convert unicode to bytes
+    *
+    */
+    static object toBytes( const boost::format& fmt )
+    {
+        return bytes( fmt.str(), encoding );
+    }
+
+    /**
+     * @brief Convert unicode to bytes
+     *
+     */
+    static object toUnicode( const boost::format& fmt )
+    {
+        return str( fmt.str() );
+    }
+};
+
+template<> struct Convert<boost::wformat>
+{
+    /**
+     * @brief Convert unicode to bytes
+     *
+     */
+    static object toBytes( const boost::wformat& fmt )
+    {
+        return bytes( fmt.str(), encoding );
+    }
+
+    /**
+     * @brief Convert unicode to bytes
+     *
+     */
+    static object toUnicode( const boost::wformat& fmt )
+    {
+        return str( fmt.str() );
+    }
+};
+
+#else /* Python 2 */
+
+template<> struct Convert<boost::format>
+{
+    /**
+     * @brief Convert unicode to bytes
+     *
+     */
+    static object toBytes( const boost::format& fmt )
+    {
+        return str( fmt.str() );
+    }
+
+    /**
+     * @brief Convert unicode to bytes
+     *
+     */
+    static object toUnicode( const boost::format& fmt )
+    {
+        return str( fmt.str() ).decode( encoding );
+    }
+};
+
+template<> struct Convert<boost::wformat>
+{
+    /**
+     * @brief Convert wformat to bytes
+     *
+     */
+    static object toBytes( const boost::wformat& fmt )
+    {
+        return unicode( fmt.str() ).attr( "encode" )( encoding );
+    }
+
+    /**
+     * @brief Convert wformat to unicode
+     *
+     */
+    static object toUnicode( const boost::wformat& fmt )
+    {
+        return unicode( fmt.str() );
+    }
+};
+
+#endif
+
 
 /**
  * @brief Expose Format class
  *
  */
-template<class FORMAT>
-void expose( const FORMAT& fmt, const char* const name )
+template<class FORMAT> void expose( const FORMAT& fmt, const char* const name )
 {
     typedef typename FORMAT::string_type string_t;
 
@@ -103,11 +207,11 @@ void expose( const FORMAT& fmt, const char* const name )
 
     class_< FORMAT >( name, init<const string_t&>() )
 #if PY_MAJOR_VERSION >= 3
-        .def( "__bytes__",      &fmtToBytes<FORMAT> )
-        .def( "__str__",        &FORMAT::str )
+        .def( "__bytes__",      &Convert<FORMAT>::toBytes )
+        .def( "__str__",        &Convert<FORMAT>::toUnicode )
 #else
-        .def( "__str__",        &FORMAT::str )
-        .def( "__unicode__",    &FORMAT::str )
+        .def( "__str__",        &Convert<FORMAT>::toBytes )
+        .def( "__unicode__",    &Convert<FORMAT>::toUnicode )
 #endif
         .def( "__mod__",        &FORMAT::template operator% <const object&>,    return_policy  )
         .def( "__mod__",        &FORMAT::template operator% <const string_t&>,  return_policy  )
