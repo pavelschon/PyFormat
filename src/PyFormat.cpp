@@ -5,6 +5,7 @@
  *
  */
 
+
 #include <boost/python.hpp>
 #include <boost/format.hpp>
 
@@ -15,11 +16,25 @@ namespace boost
 namespace python
 {
 
-typedef boost::format::string_type  string;
+typedef boost::format::string_type   string;
 typedef boost::wformat::string_type wstring;
 
+using boost::io::format_error;
+
 /**
- * @brief Convert boost::python::object to unicode
+ * @brief Translate format_error to PyExc_ValueError
+ *
+ */
+void translate_format_error( const format_error& e )
+{
+    PyErr_SetString( PyExc_ValueError, e.what() );
+
+    throw_error_already_set();
+}
+
+
+/**
+ * @brief Convert object to unicode ( Python 2 and 3 )
  *
  */
 std::wostream& operator<<( std::wostream& out, const object& obj )
@@ -31,9 +46,10 @@ std::wostream& operator<<( std::wostream& out, const object& obj )
 
 #if PY_MAJOR_VERSION >= 3
 
-const auto encoding = "utf-8";
-const auto builtins = import( "builtins" );
-const auto bytes    = builtins.attr( "bytes" );
+const char * const encoding = "utf-8";
+
+const object builtins = import( "builtins" );
+const object bytes    = builtins.attr( "bytes" );
 
 
 /**
@@ -48,7 +64,7 @@ object fmtToBytes( const FORMAT& fmt )
 
 
 /**
- * @brief Convert boost::python::object to unicode
+ * @brief Convert object to bytes ( Python 3 )
  *
  */
 std::ostream& operator<<( std::ostream& out, const object& obj )
@@ -61,7 +77,7 @@ std::ostream& operator<<( std::ostream& out, const object& obj )
 #else
 
 /**
- * @brief Convert boost::python::object to unicode
+ * @brief Convert object to string ( Python 2 )
  *
  */
 std::ostream& operator<<( std::ostream& out, const object& obj )
@@ -72,6 +88,7 @@ std::ostream& operator<<( std::ostream& out, const object& obj )
 }
 
 #endif
+
 
 /**
  * @brief Expose Format class
@@ -96,7 +113,9 @@ void expose( const FORMAT& fmt, const char* const name )
         .def( "__mod__",        &FORMAT::template operator% <const string_t&>,  return_policy  )
         .def( "__mod__",        &FORMAT::template operator% <const int&>,       return_policy  )
         .def( "__mod__",        &FORMAT::template operator% <const long&>,      return_policy  )
+#if __cplusplus >= 201103L /* C++11 */
         .def( "__mod__",        &FORMAT::template operator% <const long long&>, return_policy  )
+#endif
         .def( "__mod__",        &FORMAT::template operator% <const float&>,     return_policy  )
         .def( "__mod__",        &FORMAT::template operator% <const double&>,    return_policy  )
 
@@ -125,17 +144,12 @@ BOOST_PYTHON_MODULE( pyformat )
     using namespace boost::python;
     using boost::io::format_error;
 
-    register_exception_translator<format_error>( []( const format_error& e )
-    {
-        PyErr_SetString( PyExc_ValueError, e.what() );
-
-        throw_error_already_set();
-    });
+    register_exception_translator<format_error>( &translate_format_error );
 
     expose( boost::format(),   "Format" );
     expose( boost::wformat(), "UFormat" );
 
-    auto module = scope();
+    object module = scope();
 
     module.attr( "__doc__"     ) = "PyFormat - boost::format python module";
     module.attr( "__author__"  ) = "Pavel Schon <pavel@schon.cz>";
