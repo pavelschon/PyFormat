@@ -13,7 +13,7 @@ set( CMAKE_VERBOSE_MAKEFILE OFF )
 add_compile_options( -Wall )
 add_compile_options( -pedantic )
 add_compile_options( -fPIC )
-add_compile_options( -std=c++11 )
+# add_compile_options( -std=c++11 )
 
 option( PYTHON "Python version" 3 )
 
