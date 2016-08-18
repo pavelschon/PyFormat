@@ -62,6 +62,8 @@ include_directories(
 
 add_library( pyformat SHARED
     src/PyFormat.cpp
+    src/Operator.cpp
+    src/Convert.cpp
 )
 
 # remove 'lib' prefix

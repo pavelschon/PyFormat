@@ -6,9 +6,7 @@
  */
 
 
-#include <boost/python.hpp>
-#include <boost/format.hpp>
-
+#include "PyFormat.hpp"
 
 namespace boost
 {
@@ -16,31 +14,7 @@ namespace boost
 namespace python
 {
 
-typedef boost::format::string_type   string;
-typedef boost::wformat::string_type wstring;
-
 using boost::io::format_error;
-
-const char * const encoding = "utf-8";
-
-#if PY_MAJOR_VERSION >= 3
-
-const object builtins = import( "builtins" );
-const object bytes    = builtins.attr( "bytes" );
-
-#else /* Python 2 */
-
-const object builtins = import( "__builtin__" );
-const object unicode  = builtins.attr( "unicode" );
-
-#endif
-
-template<class FORMAT> struct Convert
-{
-    static object toBytes( const FORMAT& fmt );
-    static object toUnicode( const FORMAT& fmt );
-};
-
 
 /**
  * @brief Translate format_error to PyExc_ValueError
@@ -54,156 +28,17 @@ void translate_format_error( const format_error& e )
 }
 
 
-#if PY_MAJOR_VERSION >= 3
-
-/**
- * @brief Convert object to unicode ( Python 2 and 3 )
- *
- */
-std::wostream& operator<<( std::wostream& out, const object& obj )
-{
-    const wstring s = extract<wstring>( str( obj ) );
-
-    return out << s;
-}
-
-/**
- * @brief Convert object to bytes ( Python 3 )
- *
- */
-std::ostream& operator<<( std::ostream& out, const object& obj )
-{
-    const string s = extract<string>( bytes( str( obj ), encoding ) );
-
-    return out << s;
-}
-
-#else /* Python 2 */
-
-/**
- * @brief Convert object to unicode ( Python 2 and 3 )
- *
- */
-std::wostream& operator<<( std::wostream& out, const object& obj )
-{
-    const wstring s = extract<wstring>( unicode( obj ) );
-
-    return out << s;
-}
-
-/**
- * @brief Convert object to string ( Python 2 )
- *
- */
-std::ostream& operator<<( std::ostream& out, const object& obj )
-{
-    const string s = extract<string>( str( obj ) );
-
-    return out << s;
-}
-
-#endif
-
-#if PY_MAJOR_VERSION >= 3
-
-template<> struct Convert<boost::format>
-{
-    /**
-    * @brief Convert unicode to bytes
-    *
-    */
-    static object toBytes( const boost::format& fmt )
-    {
-        return bytes( fmt.str(), encoding );
-    }
-
-    /**
-     * @brief Convert unicode to bytes
-     *
-     */
-    static object toUnicode( const boost::format& fmt )
-    {
-        return str( fmt.str() );
-    }
-};
-
-template<> struct Convert<boost::wformat>
-{
-    /**
-     * @brief Convert unicode to bytes
-     *
-     */
-    static object toBytes( const boost::wformat& fmt )
-    {
-        return bytes( fmt.str(), encoding );
-    }
-
-    /**
-     * @brief Convert unicode to bytes
-     *
-     */
-    static object toUnicode( const boost::wformat& fmt )
-    {
-        return str( fmt.str() );
-    }
-};
-
-#else /* Python 2 */
-
-template<> struct Convert<boost::format>
-{
-    /**
-     * @brief Convert unicode to bytes
-     *
-     */
-    static object toBytes( const boost::format& fmt )
-    {
-        return str( fmt.str() );
-    }
-
-    /**
-     * @brief Convert unicode to bytes
-     *
-     */
-    static object toUnicode( const boost::format& fmt )
-    {
-        return str( fmt.str() ).decode( encoding );
-    }
-};
-
-template<> struct Convert<boost::wformat>
-{
-    /**
-     * @brief Convert wformat to bytes
-     *
-     */
-    static object toBytes( const boost::wformat& fmt )
-    {
-        return unicode( fmt.str() ).attr( "encode" )( encoding );
-    }
-
-    /**
-     * @brief Convert wformat to unicode
-     *
-     */
-    static object toUnicode( const boost::wformat& fmt )
-    {
-        return unicode( fmt.str() );
-    }
-};
-
-#endif
-
-
 /**
  * @brief Expose Format class
  *
  */
-template<class FORMAT> void expose( const FORMAT& fmt, const char* const name )
+template<class FORMAT> void expose( const FORMAT& fmt )
 {
     typedef typename FORMAT::string_type string_t;
 
     const return_internal_reference<> return_policy;
+
+    const char* const name = Convert<FORMAT>::toString( fmt ).c_str();
 
     class_< FORMAT >( name, init<const string_t&>() )
 #if PY_MAJOR_VERSION >= 3
@@ -250,10 +85,10 @@ BOOST_PYTHON_MODULE( pyformat )
 
     register_exception_translator<format_error>( &translate_format_error );
 
-    expose( boost::format(),   "Format" );
-    expose( boost::wformat(), "UFormat" );
+    expose( boost::format( "Format" ) );
+    expose( boost::wformat( L"UFormat") );
 
-    object module = scope();
+    scope module = scope();
 
     module.attr( "__doc__"     ) = "PyFormat - boost::format python module";
     module.attr( "__author__"  ) = "Pavel Schon <pavel@schon.cz>";
