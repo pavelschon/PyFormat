@@ -65,9 +65,18 @@ std::ostream& operator<<( std::ostream& out, const object& obj )
  */
 std::ostream& operator<<( std::ostream& out, const object& obj )
 {
-    const string s = extract<string>( str( obj ) );
+    if( hasattr( obj, encode ) )
+    {
+        const string s = extract<string>( obj.attr( encode )( encoding ) );
 
-    return out << s;
+        return out << s;
+    }
+    else
+    {
+        const string s = extract<string>( str( obj ) );
+
+        return out << s;
+    }
 }
 
 #endif
@@ -76,5 +85,4 @@ std::ostream& operator<<( std::ostream& out, const object& obj )
 } /* namespace python */
 
 } /* namespace boost */
-
 

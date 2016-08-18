@@ -22,6 +22,7 @@ namespace python
 typedef boost::format::string_type   string;
 typedef boost::wformat::string_type wstring;
 
+const char * const encode   = "encode";
 const char * const encoding = "utf-8";
 
 #if PY_MAJOR_VERSION >= 3
@@ -36,6 +37,16 @@ const object unicode  = builtins.attr( "unicode" );
 
 #endif
 
+enum Bits
+{
+    bad_format_string_bit = boost::io::bad_format_string_bit,
+    too_few_args_bit      = boost::io::too_few_args_bit,
+    too_many_args_bit     = boost::io::too_many_args_bit,
+    out_of_range_bit      = boost::io::out_of_range_bit,
+    all_error_bits        = boost::io::all_error_bits,
+    no_error_bits         = boost::io::no_error_bits
+};
+
 template<class FORMAT> struct Convert
 {
     static object toBytes( const FORMAT& fmt );
@@ -45,6 +56,11 @@ template<class FORMAT> struct Convert
 
 std::ostream&  operator<<( std::ostream& out,  const object& obj );
 std::wostream& operator<<( std::wostream& out, const object& obj );
+
+inline bool hasattr( const object& obj, const char* const attr_ )
+{
+    return PyObject_HasAttrString( obj.ptr(), attr_ );
+}
 
 
 } /* namespace python */

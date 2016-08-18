@@ -69,7 +69,7 @@ template<> object Convert<boost::wformat>::toUnicode( const boost::wformat& fmt 
 
 template<> object Convert<boost::wformat>::toBytes( const boost::wformat& fmt )
 {
-    return unicode( fmt.str() ).attr( "encode" )( encoding );
+    return unicode( fmt.str() ).attr( encode )( encoding );
 }
 
 template<> object Convert<boost::wformat>::toUnicode( const boost::wformat& fmt )

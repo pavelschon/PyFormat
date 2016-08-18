@@ -32,15 +32,26 @@ void translate_format_error( const format_error& e )
  * @brief Expose Format class
  *
  */
-template<class FORMAT> void expose( const FORMAT& fmt )
+template<class FORMAT> FORMAT clone( const FORMAT& fmt )
+{
+    return fmt;
+}
+
+
+/**
+ * @brief Expose Format class
+ *
+ */
+template<class FORMAT> scope expose( const FORMAT& fmt )
 {
     typedef typename FORMAT::string_type string_t;
 
-    const return_internal_reference<> return_policy;
+    const return_internal_reference<> return_ref_policy;
+    const return_value_policy<return_by_value> return_new_policy;
 
     const char* const name = Convert<FORMAT>::toString( fmt ).c_str();
 
-    class_< FORMAT >( name, init<const string_t&>() )
+    return class_< FORMAT >( name, init<const string_t&>() ).def( init<>() )
 #if PY_MAJOR_VERSION >= 3
         .def( "__bytes__",      &Convert<FORMAT>::toBytes )
         .def( "__str__",        &Convert<FORMAT>::toUnicode )
@@ -48,20 +59,28 @@ template<class FORMAT> void expose( const FORMAT& fmt )
         .def( "__str__",        &Convert<FORMAT>::toBytes )
         .def( "__unicode__",    &Convert<FORMAT>::toUnicode )
 #endif
-        .def( "__mod__",        &FORMAT::template operator% <const object&>,    return_policy  )
-        .def( "__mod__",        &FORMAT::template operator% <const string_t&>,  return_policy  )
-        .def( "__mod__",        &FORMAT::template operator% <const int&>,       return_policy  )
-        .def( "__mod__",        &FORMAT::template operator% <const long&>,      return_policy  )
-#if __cplusplus >= 201103L /* C++11 */
-        .def( "__mod__",        &FORMAT::template operator% <const long long&>, return_policy  )
-#endif
-        .def( "__mod__",        &FORMAT::template operator% <const float&>,     return_policy  )
-        .def( "__mod__",        &FORMAT::template operator% <const double&>,    return_policy  )
+        .def( "__len__",        &FORMAT::size )
 
-        .def( "swap",           &FORMAT::swap,          return_policy  )
-        .def( "clear",          &FORMAT::clear,         return_policy  )
-        .def( "clear_binds",    &FORMAT::clear_bind,    return_policy  )
-        .def( "parse",          &FORMAT::parse,         return_policy  )
+        .def( "__mod__",        &FORMAT::template operator% <const object&>,    return_ref_policy )
+        .def( "__mod__",        &FORMAT::template operator% <const string_t&>,  return_ref_policy )
+        .def( "__mod__",        &FORMAT::template operator% <const int&>,       return_ref_policy )
+        .def( "__mod__",        &FORMAT::template operator% <const long&>,      return_ref_policy )
+#if __cplusplus >= 201103L /* C++11 */
+        .def( "__mod__",        &FORMAT::template operator% <const long long&>, return_ref_policy )
+#endif
+        .def( "__mod__",        &FORMAT::template operator% <const float&>,     return_ref_policy )
+        .def( "__mod__",        &FORMAT::template operator% <const double&>,    return_ref_policy )
+
+        .def( "clone",          &clone<FORMAT>,         return_new_policy )
+        .def( "swap",           &FORMAT::swap,          return_ref_policy )
+        .def( "clear",          &FORMAT::clear,         return_ref_policy )
+        .def( "clear_binds",    &FORMAT::clear_bind,    return_ref_policy )
+        .def( "parse",          &FORMAT::parse,         return_ref_policy )
+
+        // get exceptions
+        .def( "exceptions",     static_cast<unsigned char(FORMAT::*)()const>( &FORMAT::exceptions ) )
+        // get and set exceptions
+        .def( "exceptions",     static_cast<unsigned char(FORMAT::*)(unsigned char)>( &FORMAT::exceptions ) )
 
         /* const functions */
         .def( "size",           &FORMAT::size           )
@@ -87,6 +106,16 @@ BOOST_PYTHON_MODULE( pyformat )
 
     expose( boost::format( "Format" ) );
     expose( boost::wformat( L"UFormat") );
+
+    enum_<Bits>( "bits" )
+        .value( "bad_format_string_bit",    bad_format_string_bit )
+        .value( "too_few_args_bit",         too_few_args_bit      )
+        .value( "too_many_args_bit",        too_many_args_bit     )
+        .value( "out_of_range_bit",         out_of_range_bit      )
+        .value( "all_error_bits",           all_error_bits        )
+        .value( "bad_format_string_bit",    bad_format_string_bit )
+        .value( "no_error_bits",            no_error_bits )
+        ;
 
     scope module = scope();
 
