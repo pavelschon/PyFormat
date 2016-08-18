@@ -78,9 +78,8 @@ template<class FORMAT> scope expose( const FORMAT& fmt )
         .def( "parse",          &FORMAT::parse,         return_ref_policy )
 
         // get exceptions
-        .def( "exceptions",     static_cast<unsigned char(FORMAT::*)()const>( &FORMAT::exceptions ) )
-        // get and set exceptions
-        .def( "exceptions",     static_cast<unsigned char(FORMAT::*)(unsigned char)>( &FORMAT::exceptions ) )
+        .add_property( "exceptions", static_cast<unsigned char(FORMAT::*)()const>( &FORMAT::exceptions )
+                                   , static_cast<unsigned char(FORMAT::*)(unsigned char)>( &FORMAT::exceptions ) )
 
         /* const functions */
         .def( "size",           &FORMAT::size           )
