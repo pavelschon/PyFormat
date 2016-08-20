@@ -27,6 +27,30 @@ template<> string Convert<boost::wformat>::toString( const boost::wformat& fmt )
     return string( w.begin(), w.end() );
 }
 
+/**
+ * @brief Expose Format class
+ *
+ */
+template<class FORMAT> typename FORMAT::string_type Convert<FORMAT>::repr( object& obj )
+{
+    FORMAT fmtCopy = extract<FORMAT>( obj );
+
+    fmtCopy.exceptions( all_error_bits ^ ( too_many_args_bit | too_few_args_bit )  );
+
+    return fmtCopy.str();
+}
+
+
+/**
+ * @brief Expose Format class
+ *
+ */
+template<class FORMAT> FORMAT Convert<FORMAT>::clone( const FORMAT& fmt )
+{
+    return fmt;
+}
+
+
 #if PY_MAJOR_VERSION >= 3
 
 template<> object Convert<boost::format>::toBytes( const boost::format& fmt )
@@ -78,6 +102,19 @@ template<> object Convert<boost::wformat>::toUnicode( const boost::wformat& fmt 
 }
 
 #endif
+
+/**
+ * @brief Expose Format class
+ *
+ */
+template<class FORMAT> object repr( object& obj )
+{
+    FORMAT fmtCopy = extract<FORMAT>( obj );
+
+    fmtCopy.exceptions( all_error_bits ^ ( too_many_args_bit | too_few_args_bit )  );
+
+    return Convert<FORMAT>::toBytes( fmtCopy );
+}
 
 template struct Convert<boost::format>;
 template struct Convert<boost::wformat>;

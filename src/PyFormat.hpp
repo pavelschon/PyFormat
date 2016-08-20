@@ -52,6 +52,9 @@ template<class FORMAT> struct Convert
     static object toBytes( const FORMAT& fmt );
     static object toUnicode( const FORMAT& fmt );
     static string toString( const FORMAT& fmt );
+
+    static FORMAT clone( const FORMAT& fmt );
+    static typename FORMAT::string_type repr( object& obj );
 };
 
 std::ostream&  operator<<( std::ostream& out,  const object& obj );

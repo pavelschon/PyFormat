@@ -32,16 +32,6 @@ void translate_format_error( const format_error& e )
  * @brief Expose Format class
  *
  */
-template<class FORMAT> FORMAT clone( const FORMAT& fmt )
-{
-    return fmt;
-}
-
-
-/**
- * @brief Expose Format class
- *
- */
 template<class FORMAT> scope expose( const FORMAT& fmt )
 {
     typedef typename FORMAT::string_type string_t;
@@ -60,9 +50,12 @@ template<class FORMAT> scope expose( const FORMAT& fmt )
         .def( "__unicode__",    &Convert<FORMAT>::toUnicode )
 #endif
         .def( "__len__",        &FORMAT::size )
+        .def( "__repr__",       &Convert<FORMAT>::repr )
+        .def( "__copy__",       &Convert<FORMAT>::clone,return_new_policy )
 
         .def( "__mod__",        &FORMAT::template operator% <const object&>,    return_ref_policy )
         .def( "__mod__",        &FORMAT::template operator% <const string_t&>,  return_ref_policy )
+        .def( "__mod__",        &FORMAT::template operator% <const bool&>,      return_ref_policy )
         .def( "__mod__",        &FORMAT::template operator% <const int&>,       return_ref_policy )
         .def( "__mod__",        &FORMAT::template operator% <const long&>,      return_ref_policy )
 #if __cplusplus >= 201103L /* C++11 */
@@ -70,8 +63,9 @@ template<class FORMAT> scope expose( const FORMAT& fmt )
 #endif
         .def( "__mod__",        &FORMAT::template operator% <const float&>,     return_ref_policy )
         .def( "__mod__",        &FORMAT::template operator% <const double&>,    return_ref_policy )
+        .def( "__mod__",        &FORMAT::template operator% <const long double&>, return_ref_policy )
 
-        .def( "clone",          &clone<FORMAT>,         return_new_policy )
+        .def( "clone",          &Convert<FORMAT>::clone,return_new_policy )
         .def( "swap",           &FORMAT::swap,          return_ref_policy )
         .def( "clear",          &FORMAT::clear,         return_ref_policy )
         .def( "clear_binds",    &FORMAT::clear_bind,    return_ref_policy )
