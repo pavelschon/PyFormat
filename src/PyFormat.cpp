@@ -39,41 +39,41 @@ template<class FORMAT> scope expose( const FORMAT& fmt )
     const return_internal_reference<> return_ref_policy;
     const return_value_policy<return_by_value> return_new_policy;
 
-    const char* const name = Convert<FORMAT>::toString( fmt ).c_str();
+    const char* const name = Format<FORMAT>::toString( fmt ).c_str();
 
     return class_< FORMAT >( name, init<const string_t&>() ).def( init<>() )
 #if PY_MAJOR_VERSION >= 3
-        .def( "__bytes__",      &Convert<FORMAT>::toBytes )
-        .def( "__str__",        &Convert<FORMAT>::toUnicode )
+        .def( "__bytes__",      &Format<FORMAT>::toBytes )
+        .def( "__str__",        &Format<FORMAT>::toUnicode )
 #else
-        .def( "__str__",        &Convert<FORMAT>::toBytes )
-        .def( "__unicode__",    &Convert<FORMAT>::toUnicode )
+        .def( "__str__",        &Format<FORMAT>::toBytes )
+        .def( "__unicode__",    &Format<FORMAT>::toUnicode )
 #endif
         .def( "__len__",        &FORMAT::size )
-        .def( "__repr__",       &Convert<FORMAT>::repr )
-        .def( "__copy__",       &Convert<FORMAT>::clone,return_new_policy )
+        .def( "__repr__",       &Format<FORMAT>::repr )
+        .def( "__copy__",       &Format<FORMAT>::clone,return_new_policy )
 
-        .def( "__mod__",        &FORMAT::template operator% <const object&>,    return_ref_policy )
-        .def( "__mod__",        &FORMAT::template operator% <const string_t&>,  return_ref_policy )
-        .def( "__mod__",        &FORMAT::template operator% <const bool&>,      return_ref_policy )
-        .def( "__mod__",        &FORMAT::template operator% <const int&>,       return_ref_policy )
-        .def( "__mod__",        &FORMAT::template operator% <const long&>,      return_ref_policy )
+        .def( "__mod__",        &FORMAT::template operator% <const object&>,      return_ref_policy )
+        .def( "__mod__",        &FORMAT::template operator% <const string_t&>,    return_ref_policy )
+        .def( "__mod__",        &FORMAT::template operator% <const bool&>,        return_ref_policy )
+        .def( "__mod__",        &FORMAT::template operator% <const int&>,         return_ref_policy )
+        .def( "__mod__",        &FORMAT::template operator% <const long&>,        return_ref_policy )
 #if __cplusplus >= 201103L /* C++11 */
-        .def( "__mod__",        &FORMAT::template operator% <const long long&>, return_ref_policy )
+        .def( "__mod__",        &FORMAT::template operator% <const long long&>,   return_ref_policy )
 #endif
-        .def( "__mod__",        &FORMAT::template operator% <const float&>,     return_ref_policy )
-        .def( "__mod__",        &FORMAT::template operator% <const double&>,    return_ref_policy )
+        .def( "__mod__",        &FORMAT::template operator% <const float&>,       return_ref_policy )
+        .def( "__mod__",        &FORMAT::template operator% <const double&>,      return_ref_policy )
         .def( "__mod__",        &FORMAT::template operator% <const long double&>, return_ref_policy )
 
-        .def( "clone",          &Convert<FORMAT>::clone,return_new_policy )
+        .def( "clone",          &Format<FORMAT>::clone,return_new_policy )
         .def( "swap",           &FORMAT::swap,          return_ref_policy )
         .def( "clear",          &FORMAT::clear,         return_ref_policy )
         .def( "clear_binds",    &FORMAT::clear_bind,    return_ref_policy )
         .def( "parse",          &FORMAT::parse,         return_ref_policy )
 
         // get exceptions
-        .add_property( "exceptions", static_cast<unsigned char(FORMAT::*)()const>( &FORMAT::exceptions )
-                                   , static_cast<unsigned char(FORMAT::*)(unsigned char)>( &FORMAT::exceptions ) )
+        .add_property( "exceptions", static_cast<typename FORMAT::exceptions_const_t>( &FORMAT::exceptions )
+                                   , static_cast<typename FORMAT::exceptions_1arg_t>(  &FORMAT::exceptions ) )
 
         /* const functions */
         .def( "size",           &FORMAT::size           )

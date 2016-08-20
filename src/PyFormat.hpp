@@ -55,6 +55,9 @@ template<class FORMAT> struct Convert
 
     static FORMAT clone( const FORMAT& fmt );
     static typename FORMAT::string_type repr( object& obj );
+
+    typedef unsigned char(FORMAT::*)()const exceptions_const_t;
+    typedef unsigned char(FORMAT::*)(unsigned char) exceptions_1arg_t
 };
 
 std::ostream&  operator<<( std::ostream& out,  const object& obj );
