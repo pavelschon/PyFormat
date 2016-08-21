@@ -57,9 +57,8 @@ from pyformat import Format as F, UFormat as U
 tmpl = U('foo %||') # parsed only once
 
 def foo(i):
-    fmt = tmpl.clone() # clone parsed object
-    
-    print( fmt % 1 )
+    fmt = tmpl.clone() # clone parsed object (copy.copy() also works)
+    print(fmt % i)
 
 foo(1)
 foo(2)
@@ -94,5 +93,3 @@ ValueError: boost::too_few_args: format-string referred to more arguments than w
 >>> print(fmt % '1' )
 first 1 second
 ```
-
-
