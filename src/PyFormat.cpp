@@ -35,27 +35,33 @@ void translate_format_error( const format_error& e )
 template<class FORMAT> scope expose( const FORMAT& fmt )
 {
     typedef typename FORMAT::string_type string_t;
+    typedef Convert<FORMAT> Format;
 
     const return_internal_reference<> return_ref_policy;
     const return_value_policy<return_by_value> return_new_policy;
 
-    const char* const name = Format<FORMAT>::toString( fmt ).c_str();
+    const char* const name = Format::toString( fmt ).c_str();
+
+    const typename Format::exceptions_get_t exceptions_get = (
+        static_cast< typename Format::exceptions_get_t>( &FORMAT::exceptions ) );
+
+    const typename Format::exceptions_set_t exceptions_set = (
+        static_cast< typename Format::exceptions_set_t>( &FORMAT::exceptions ) );
 
     return class_< FORMAT >( name, init<const string_t&>() ).def( init<>() )
 #if PY_MAJOR_VERSION >= 3
-        .def( "__bytes__",      &Format<FORMAT>::toBytes )
-        .def( "__str__",        &Format<FORMAT>::toUnicode )
+        .def( "__bytes__",      &Format::toBytes )
+        .def( "__str__",        &Format::toUnicode )
 #else
-        .def( "__str__",        &Format<FORMAT>::toBytes )
-        .def( "__unicode__",    &Format<FORMAT>::toUnicode )
+        .def( "__str__",        &Format::toBytes )
+        .def( "__unicode__",    &Format::toUnicode )
 #endif
         .def( "__len__",        &FORMAT::size )
-        .def( "__repr__",       &Format<FORMAT>::repr )
-        .def( "__copy__",       &Format<FORMAT>::clone,return_new_policy )
+        .def( "__repr__",       &Format::repr )
+        .def( "__copy__",       &Format::clone,         return_new_policy )
 
         .def( "__mod__",        &FORMAT::template operator% <const object&>,      return_ref_policy )
         .def( "__mod__",        &FORMAT::template operator% <const string_t&>,    return_ref_policy )
-        .def( "__mod__",        &FORMAT::template operator% <const bool&>,        return_ref_policy )
         .def( "__mod__",        &FORMAT::template operator% <const int&>,         return_ref_policy )
         .def( "__mod__",        &FORMAT::template operator% <const long&>,        return_ref_policy )
 #if __cplusplus >= 201103L /* C++11 */
@@ -65,15 +71,14 @@ template<class FORMAT> scope expose( const FORMAT& fmt )
         .def( "__mod__",        &FORMAT::template operator% <const double&>,      return_ref_policy )
         .def( "__mod__",        &FORMAT::template operator% <const long double&>, return_ref_policy )
 
-        .def( "clone",          &Format<FORMAT>::clone,return_new_policy )
+        .def( "clone",          &Format::clone,         return_new_policy )
         .def( "swap",           &FORMAT::swap,          return_ref_policy )
         .def( "clear",          &FORMAT::clear,         return_ref_policy )
         .def( "clear_binds",    &FORMAT::clear_bind,    return_ref_policy )
         .def( "parse",          &FORMAT::parse,         return_ref_policy )
 
-        // get exceptions
-        .add_property( "exceptions", static_cast<typename FORMAT::exceptions_const_t>( &FORMAT::exceptions )
-                                   , static_cast<typename FORMAT::exceptions_1arg_t>(  &FORMAT::exceptions ) )
+        /* get and set exceptions */
+        .add_property( "exceptions", exceptions_get, exceptions_set )
 
         /* const functions */
         .def( "size",           &FORMAT::size           )

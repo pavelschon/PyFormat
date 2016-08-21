@@ -49,15 +49,15 @@ enum Bits
 
 template<class FORMAT> struct Convert
 {
+    typedef unsigned char(FORMAT::*exceptions_get_t)()const;
+    typedef unsigned char(FORMAT::*exceptions_set_t)(unsigned char);
+    
     static object toBytes( const FORMAT& fmt );
     static object toUnicode( const FORMAT& fmt );
     static string toString( const FORMAT& fmt );
 
     static FORMAT clone( const FORMAT& fmt );
     static typename FORMAT::string_type repr( object& obj );
-
-    typedef unsigned char(FORMAT::*)()const exceptions_const_t;
-    typedef unsigned char(FORMAT::*)(unsigned char) exceptions_1arg_t
 };
 
 std::ostream&  operator<<( std::ostream& out,  const object& obj );
