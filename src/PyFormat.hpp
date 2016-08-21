@@ -57,10 +57,10 @@ template<class FORMAT> struct Wrapper
     static string toString( const FORMAT& fmt );
 
     static FORMAT clone( const FORMAT& fmt );
-    static typename FORMAT::string_type repr( object& obj );
+    static typename FORMAT::string_type repr( const FORMAT& fmt );
 };
 
-std::ostream&  operator<<( std::ostream& out,  const object& obj );
+std::ostream&  operator<<( std::ostream&  out, const object& obj );
 std::wostream& operator<<( std::wostream& out, const object& obj );
 
 inline bool hasattr( const object& obj, const char* const attr_ )

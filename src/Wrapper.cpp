@@ -1,5 +1,5 @@
 /**
- * @file Convert.cpp
+ * @file Wrapper.cpp
  *
  * Copyright (c) 2016 Pavel Schön <pavel@schon.cz>
  *
@@ -28,12 +28,12 @@ template<> string Wrapper<boost::wformat>::toString( const boost::wformat& fmt )
 }
 
 /**
- * @brief Expose Format class
+ * @brief Get representation of format
  *
  */
-template<class FORMAT> typename FORMAT::string_type Wrapper<FORMAT>::repr( object& obj )
+template<class FORMAT> typename FORMAT::string_type Wrapper<FORMAT>::repr( const FORMAT& fmt )
 {
-    FORMAT fmtCopy = extract<FORMAT>( obj );
+    FORMAT fmtCopy( fmt );
 
     fmtCopy.exceptions( all_error_bits ^ ( too_many_args_bit | too_few_args_bit )  );
 
@@ -81,7 +81,7 @@ template<> object Wrapper<boost::format>::toUnicode( const boost::format& fmt )
 
 template<> object Wrapper<boost::wformat>::toBytes( const boost::wformat& fmt )
 {
-    return bytes( fmt.str(), encoding );
+    return str( fmt.str() ).attr( encode )( encoding );
 }
 
 template<> object Wrapper<boost::wformat>::toUnicode( const boost::wformat& fmt )
@@ -102,19 +102,6 @@ template<> object Wrapper<boost::wformat>::toUnicode( const boost::wformat& fmt 
 }
 
 #endif
-
-/**
- * @brief Expose Format class
- *
- */
-template<class FORMAT> object repr( object& obj )
-{
-    FORMAT fmtCopy = extract<FORMAT>( obj );
-
-    fmtCopy.exceptions( all_error_bits ^ ( too_many_args_bit | too_few_args_bit )  );
-
-    return Wrapper<FORMAT>::toBytes( fmtCopy );
-}
 
 template struct Wrapper<boost::format>;
 template struct Wrapper<boost::wformat>;

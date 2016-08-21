@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 
+import copy
 import sys
 import unittest
 
@@ -96,6 +97,12 @@ class TestUFormat(unittest.TestCase):
 
         self.assertEqual(str_( u ), 'v')
         self.assertEqual(str_( v ), 'u')
+
+
+    def testCopy(self):
+        u = U('%||')
+        v = u.clone()
+        w = copy.copy(v)
 
 
 if __name__ == '__main__':
