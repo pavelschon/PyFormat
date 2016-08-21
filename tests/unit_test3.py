@@ -38,25 +38,18 @@ class TestUFormat(unittest.TestCase):
     def testOutput(self):
         u = U('%|| %|| %||')
         self.assertEqual(str_( u % 'ě' % 'č' % 'š' ), 'ě č š')
-        self.assertEqual(bytes_( u ), b'\xc4\x9b \xc4\x8d \xc5\xa1')
 
         u = U('%|.2f|')
         self.assertEqual(str_( u % 1.0 ), '1.00')
 
         u = U('%||')
         self.assertEqual(str_( u % None ), 'None')
-        self.assertEqual(bytes_( u % None ), b'None')
-
-        u = U('%||')
-        self.assertEqual(bytes_( u % None ), b'None')
-        self.assertEqual(bytes_( u % None ), b'None')
 
         f = F(b'%|| %|| %||')
         self.assertEqual(bytes_( f % b'e' % b'c' % b's' ), b'e c s')
 
         f = F(b'%|| %|| %||')
         self.assertEqual(bytes_( f % b'e' % b'c' % b's' ), b'e c s')
-        self.assertEqual(str_( f % 'ě' % 'č' % 'š' ), 'ě č š')
 
         f = F(b'%|.2f|')
         self.assertEqual(bytes_( f % 1.0 ), b'1.00')

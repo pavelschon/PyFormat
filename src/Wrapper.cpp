@@ -15,6 +15,18 @@ namespace boost
 namespace python
 {
 
+object method_not_supported( const string& method )
+{
+    const string message = method + string( "is not implemented" );
+
+    PyErr_SetString( PyExc_NotImplementedError, message.c_str() );
+
+    throw_error_already_set();
+
+    return object();
+}
+
+
 template<> string Wrapper<boost::format>::toString( const boost::format& fmt )
 {
     return fmt.str();
@@ -55,12 +67,13 @@ template<class FORMAT> FORMAT Wrapper<FORMAT>::clone( const FORMAT& fmt )
 
 template<> object Wrapper<boost::format>::toBytes( const boost::format& fmt )
 {
-    return bytes( fmt.str(), encoding );
+    // FIXME https://github.com/boostorg/python/pull/54
+    return object( handle<>( PyBytes_FromString( fmt.str().c_str() ) ) );
 }
 
 template<> object Wrapper<boost::format>::toUnicode( const boost::format& fmt )
 {
-    return str( fmt.str() );
+    return method_not_supported( "__str__" );
 }
 
 #else
@@ -72,7 +85,7 @@ template<> object Wrapper<boost::format>::toBytes( const boost::format& fmt )
 
 template<> object Wrapper<boost::format>::toUnicode( const boost::format& fmt )
 {
-    return str( fmt.str() ).decode( encoding );
+    return method_not_supported( "__unicode__" );
 }
 
 #endif
@@ -81,7 +94,7 @@ template<> object Wrapper<boost::format>::toUnicode( const boost::format& fmt )
 
 template<> object Wrapper<boost::wformat>::toBytes( const boost::wformat& fmt )
 {
-    return str( fmt.str() ).attr( encode )( encoding );
+    return method_not_supported( "__bytes__" );
 }
 
 template<> object Wrapper<boost::wformat>::toUnicode( const boost::wformat& fmt )
@@ -93,12 +106,12 @@ template<> object Wrapper<boost::wformat>::toUnicode( const boost::wformat& fmt 
 
 template<> object Wrapper<boost::wformat>::toBytes( const boost::wformat& fmt )
 {
-    return unicode( fmt.str() ).attr( encode )( encoding );
+    return method_not_supported( "__str__" );
 }
 
 template<> object Wrapper<boost::wformat>::toUnicode( const boost::wformat& fmt )
 {
-    return unicode( fmt.str() );
+    return object( fmt.str() ); // unicode object
 }
 
 #endif
