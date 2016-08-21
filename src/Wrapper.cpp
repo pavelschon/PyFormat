@@ -15,6 +15,10 @@ namespace boost
 namespace python
 {
 
+/**
+ * @brief FIXME
+ *
+ */
 object method_not_supported( const string& method )
 {
     const string& message = method + string( " is not implemented" );
@@ -27,17 +31,27 @@ object method_not_supported( const string& method )
 }
 
 
+/**
+ * @brief FIXME
+ *
+ */
 template<> string Wrapper<boost::format>::toString( const boost::format& fmt )
 {
     return fmt.str();
 }
 
+
+/**
+ * @brief FIXME
+ *
+ */
 template<> string Wrapper<boost::wformat>::toString( const boost::wformat& fmt )
 {
     const wstring w = fmt.str();
 
     return string( w.begin(), w.end() );
 }
+
 
 /**
  * @brief Get representation of format
@@ -65,12 +79,22 @@ template<class FORMAT> FORMAT Wrapper<FORMAT>::clone( const FORMAT& fmt )
 
 #if PY_MAJOR_VERSION >= 3
 
+
+/**
+ * @brief FIXME
+ *
+ */
 template<> object Wrapper<boost::format>::toBytes( const boost::format& fmt )
 {
     // FIXME https://github.com/boostorg/python/pull/54
     return object( handle<>( PyBytes_FromString( fmt.str().c_str() ) ) );
 }
 
+
+/**
+ * @brief FIXME
+ *
+ */
 template<> object Wrapper<boost::format>::toUnicode( const boost::format& fmt )
 {
     return method_not_supported( "__str__" );
@@ -78,11 +102,21 @@ template<> object Wrapper<boost::format>::toUnicode( const boost::format& fmt )
 
 #else
 
+
+/**
+ * @brief FIXME
+ *
+ */
 template<> object Wrapper<boost::format>::toBytes( const boost::format& fmt )
 {
     return str( fmt.str() );
 }
 
+
+/**
+ * @brief FIXME
+ *
+ */
 template<> object Wrapper<boost::format>::toUnicode( const boost::format& fmt )
 {
     return method_not_supported( "__unicode__" );
@@ -92,11 +126,20 @@ template<> object Wrapper<boost::format>::toUnicode( const boost::format& fmt )
 
 #if PY_MAJOR_VERSION >= 3
 
+/**
+ * @brief FIXME
+ *
+ */
 template<> object Wrapper<boost::wformat>::toBytes( const boost::wformat& fmt )
 {
     return method_not_supported( "__bytes__" );
 }
 
+
+/**
+ * @brief FIXME
+ *
+ */
 template<> object Wrapper<boost::wformat>::toUnicode( const boost::wformat& fmt )
 {
     return str( fmt.str() );
@@ -104,11 +147,21 @@ template<> object Wrapper<boost::wformat>::toUnicode( const boost::wformat& fmt 
 
 #else /* Python 2 */
 
+
+/**
+ * @brief FIXME
+ *
+ */
 template<> object Wrapper<boost::wformat>::toBytes( const boost::wformat& fmt )
 {
     return method_not_supported( "__str__" );
 }
 
+
+/**
+ * @brief FIXME
+ *
+ */
 template<> object Wrapper<boost::wformat>::toUnicode( const boost::wformat& fmt )
 {
     return object( fmt.str() ); // unicode object
