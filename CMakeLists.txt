@@ -43,13 +43,13 @@ include_directories(
 add_library( pyformat SHARED
     src/PyFormat.cpp
     src/Operator.cpp
-    src/Convert.cpp
+    src/Wrapper.cpp
 )
 
 # remove 'lib' prefix
 set_target_properties( pyformat PROPERTIES PREFIX "" )
 
-target_link_libraries( pyformat
+target_link_libraries( pyformat optimized
     ${Boost_LIBRARIES}
     ${PYTHON_LIBRARIES}
 )

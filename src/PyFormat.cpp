@@ -35,7 +35,7 @@ void translate_format_error( const format_error& e )
 template<class FORMAT> scope expose( const FORMAT& fmt )
 {
     typedef typename FORMAT::string_type string_t;
-    typedef Convert<FORMAT> Format;
+    typedef Wrapper<FORMAT> Format;
 
     const return_internal_reference<> return_ref_policy;
     const return_value_policy<return_by_value> return_new_policy;

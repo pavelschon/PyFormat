@@ -15,12 +15,12 @@ namespace boost
 namespace python
 {
 
-template<> string Convert<boost::format>::toString( const boost::format& fmt )
+template<> string Wrapper<boost::format>::toString( const boost::format& fmt )
 {
     return fmt.str();
 }
 
-template<> string Convert<boost::wformat>::toString( const boost::wformat& fmt )
+template<> string Wrapper<boost::wformat>::toString( const boost::wformat& fmt )
 {
     const wstring w = fmt.str();
 
@@ -31,7 +31,7 @@ template<> string Convert<boost::wformat>::toString( const boost::wformat& fmt )
  * @brief Expose Format class
  *
  */
-template<class FORMAT> typename FORMAT::string_type Convert<FORMAT>::repr( object& obj )
+template<class FORMAT> typename FORMAT::string_type Wrapper<FORMAT>::repr( object& obj )
 {
     FORMAT fmtCopy = extract<FORMAT>( obj );
 
@@ -45,7 +45,7 @@ template<class FORMAT> typename FORMAT::string_type Convert<FORMAT>::repr( objec
  * @brief Expose Format class
  *
  */
-template<class FORMAT> FORMAT Convert<FORMAT>::clone( const FORMAT& fmt )
+template<class FORMAT> FORMAT Wrapper<FORMAT>::clone( const FORMAT& fmt )
 {
     return fmt;
 }
@@ -53,24 +53,24 @@ template<class FORMAT> FORMAT Convert<FORMAT>::clone( const FORMAT& fmt )
 
 #if PY_MAJOR_VERSION >= 3
 
-template<> object Convert<boost::format>::toBytes( const boost::format& fmt )
+template<> object Wrapper<boost::format>::toBytes( const boost::format& fmt )
 {
     return bytes( fmt.str(), encoding );
 }
 
-template<> object Convert<boost::format>::toUnicode( const boost::format& fmt )
+template<> object Wrapper<boost::format>::toUnicode( const boost::format& fmt )
 {
     return str( fmt.str() );
 }
 
 #else
 
-template<> object Convert<boost::format>::toBytes( const boost::format& fmt )
+template<> object Wrapper<boost::format>::toBytes( const boost::format& fmt )
 {
     return str( fmt.str() );
 }
 
-template<> object Convert<boost::format>::toUnicode( const boost::format& fmt )
+template<> object Wrapper<boost::format>::toUnicode( const boost::format& fmt )
 {
     return str( fmt.str() ).decode( encoding );
 }
@@ -79,24 +79,24 @@ template<> object Convert<boost::format>::toUnicode( const boost::format& fmt )
 
 #if PY_MAJOR_VERSION >= 3
 
-template<> object Convert<boost::wformat>::toBytes( const boost::wformat& fmt )
+template<> object Wrapper<boost::wformat>::toBytes( const boost::wformat& fmt )
 {
     return bytes( fmt.str(), encoding );
 }
 
-template<> object Convert<boost::wformat>::toUnicode( const boost::wformat& fmt )
+template<> object Wrapper<boost::wformat>::toUnicode( const boost::wformat& fmt )
 {
     return str( fmt.str() );
 }
 
 #else /* Python 2 */
 
-template<> object Convert<boost::wformat>::toBytes( const boost::wformat& fmt )
+template<> object Wrapper<boost::wformat>::toBytes( const boost::wformat& fmt )
 {
     return unicode( fmt.str() ).attr( encode )( encoding );
 }
 
-template<> object Convert<boost::wformat>::toUnicode( const boost::wformat& fmt )
+template<> object Wrapper<boost::wformat>::toUnicode( const boost::wformat& fmt )
 {
     return unicode( fmt.str() );
 }
@@ -113,11 +113,11 @@ template<class FORMAT> object repr( object& obj )
 
     fmtCopy.exceptions( all_error_bits ^ ( too_many_args_bit | too_few_args_bit )  );
 
-    return Convert<FORMAT>::toBytes( fmtCopy );
+    return Wrapper<FORMAT>::toBytes( fmtCopy );
 }
 
-template struct Convert<boost::format>;
-template struct Convert<boost::wformat>;
+template struct Wrapper<boost::format>;
+template struct Wrapper<boost::wformat>;
 
 
 } /* namespace python */

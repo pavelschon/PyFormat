@@ -47,7 +47,7 @@ enum Bits
     no_error_bits         = boost::io::no_error_bits
 };
 
-template<class FORMAT> struct Convert
+template<class FORMAT> struct Wrapper
 {
     typedef unsigned char(FORMAT::*exceptions_get_t)()const;
     typedef unsigned char(FORMAT::*exceptions_set_t)(unsigned char);
