@@ -17,7 +17,7 @@ namespace python
 
 object method_not_supported( const string& method )
 {
-    const string message = method + string( "is not implemented" );
+    const string& message = method + string( " is not implemented" );
 
     PyErr_SetString( PyExc_NotImplementedError, message.c_str() );
 
@@ -54,7 +54,7 @@ template<class FORMAT> typename FORMAT::string_type Wrapper<FORMAT>::repr( const
 
 
 /**
- * @brief Expose Format class
+ * @brief Clone format object
  *
  */
 template<class FORMAT> FORMAT Wrapper<FORMAT>::clone( const FORMAT& fmt )
