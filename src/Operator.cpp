@@ -15,6 +15,18 @@ namespace boost
 namespace python
 {
 
+#if PY_MAJOR_VERSION >= 3
+
+const object builtins = import( "builtins" );
+const object bytes    = builtins.attr( "bytes" );
+
+#else /* Python 2 */
+
+const object builtins = import( "__builtin__" );
+const object unicode  = builtins.attr( "unicode" );
+
+#endif
+
 
 #if PY_MAJOR_VERSION >= 3
 
@@ -52,9 +64,17 @@ std::wostream& operator<<( std::wostream& out, const object& obj )
  */
 std::ostream& operator<<( std::ostream& out, const object& obj )
 {
-    const string s = extract<string>( bytes( str( obj ), encoding ) );
+    if( obj.is_none() )
+    {
+        // workaround TypeError: 'NoneType' object is not iterable
+        return out << "None";
+    }
+    else
+    {
+        const string s = extract<string>( bytes( obj ) );
 
-    return out << s;
+        return out << s;
+    }
 }
 
 #else /* Python 2 */
@@ -65,18 +85,9 @@ std::ostream& operator<<( std::ostream& out, const object& obj )
  */
 std::ostream& operator<<( std::ostream& out, const object& obj )
 {
-    if( hasattr( obj, encode ) )
-    {
-        const string s = extract<string>( obj.attr( encode )( encoding ) );
+    const string s = extract<string>( str( obj ) );
 
-        return out << s;
-    }
-    else
-    {
-        const string s = extract<string>( str( obj ) );
-
-        return out << s;
-    }
+    return out << s;
 }
 
 #endif
