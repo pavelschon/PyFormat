@@ -74,7 +74,8 @@ template<class FORMAT> scope expose( const FORMAT& fmt )
         .def( "clone",          &Format::clone,         return_new_policy )
         .def( "swap",           &FORMAT::swap,          return_ref_policy )
         .def( "clear",          &FORMAT::clear,         return_ref_policy )
-        .def( "clear_binds",    &FORMAT::clear_bind,    return_ref_policy )
+        .def( "clear_bind",     &FORMAT::clear_bind,    return_ref_policy )
+        .def( "clear_binds",    &FORMAT::clear_binds,   return_ref_policy )
         .def( "parse",          &FORMAT::parse,         return_ref_policy )
 
         /* get and set exceptions */
