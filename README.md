@@ -2,7 +2,7 @@
 
 **PyFormat** is fast string formatting module, which exposes **boost::format** class to Python.
 
-Please refer to **boost::format** documentation to explore all formatting capabilities.
+Please refer to <a href="http://www.boost.org/doc/libs/1_61_0/libs/format/doc/format.html#syntax" target="_blank">**boost::format**</a> documentation to explore all formatting capabilities.
 
 The module is compatible with Python 2.x and Python 3.x versions and fully supports unicode.
 
@@ -42,11 +42,17 @@ $ dpkg -i pyformat-0.1.0-Linux.deb
 
 ```
 >>> from pyformat import Format as F, UFormat as U
->>> fmt = U('%|| %|| %||')
->>> print( fmt % 'a' % 'b' % 'c' )
+>>> fmt = U('%s %s %s')
+>>> print(fmt % 'a' % 'b' % 'c')
 a b c
->>> print( fmt % 1 % 2 % 3 )
+>>> print(fmt % 1 % 2 % 3)
 1 2 3
+```
+
+## repr() works also on format object which is not fully populated ##
+```
+>>> U('some args are missing: %s') 
+some args are not missing:
 ```
 
 ## Cloning format object ##
@@ -54,7 +60,7 @@ a b c
 ```
 from pyformat import Format as F, UFormat as U
 
-tmpl = U('foo %||') # parsed only once
+tmpl = U('foo %s') # parsed only once
 
 def foo(i):
     fmt = tmpl.clone() # clone parsed object (copy.copy() also works)
@@ -65,25 +71,41 @@ foo(2)
 foo(3)
 ```
 
+## Functional use case ##
+
+```
+>>> fmt = U('a=%s b=%s c=%s d=%s e=%s')                                                                                                                                                                                                                                        
+>>> reduce(lambda f, i: f % i, range(fmt.expected_args()), fmt.clone())                                                                                                                                                                                                        
+a=0 b=1 c=2 d=3 e=4
+```
+
+## Passing any object as argument ##
+
+```
+>>> U('arg=%s') % type
+arg=<class 'type'>
+>>> U('arg=%s') % None
+arg=None
+```
+
 ## Parsing format object ##
 
 ```
 >>> fmt = U()
->>> fmt.parse('%||')
+>>> fmt.parse('%s')
 ```
 
-## Swapping format object ##
+## Swap format objects ##
 
 ```
 >>> fmt1, fmt2 = U('first'), U('second')
 >>> fmt1.swap(fmt2)
 ```
 
-
-## Setting which errors raise exception ##
+## Setting which errors raise exception (using bitmask) ##
 
 ```
->>> fmt = U('first %|| second %||')
+>>> fmt = U('first %s second %s')
 >>> print(fmt % '1' )
 Traceback (most recent call last):
   File "<stdin>", line 1, in <module>
@@ -93,3 +115,4 @@ ValueError: boost::too_few_args: format-string referred to more arguments than w
 >>> print(fmt % '1' )
 first 1 second
 ```
+
