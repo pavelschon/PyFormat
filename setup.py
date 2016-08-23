@@ -9,7 +9,6 @@
 #
 
 import glob
-import distutils.sysconfig
 
 try:
     from setuptools import setup, Extension
