@@ -120,7 +120,7 @@ BOOST_PYTHON_MODULE( pyformat )
 
     module.attr( "__doc__"     ) = "PyFormat - boost::format python module";
     module.attr( "__author__"  ) = "Pavel Schon <pavel@schon.cz>";
-    module.attr( "__version__" ) = "0.1.0";
+    module.attr( "__version__" ) = "0.1.1";
 
 } /* pyformat */
 
